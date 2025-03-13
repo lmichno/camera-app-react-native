@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Animated, useAnimatedValue } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Animated, useAnimatedValue, Alert } from 'react-native';
 import { useRef, useState } from 'react';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useFocusEffect } from '@react-navigation/native';
+import * as MediaLibrary from 'expo-media-library';
 
 const CameraPage = ({ navigation }) => {
     const [permission, requestPermission] = useCameraPermissions();
@@ -45,9 +46,26 @@ const CameraPage = ({ navigation }) => {
 
     const handleTakePhoto = async () => {
         if (cameraRef.current) {
-            let photo = await cameraRef.current.takePictureAsync();
-            await MediaLibrary.createAssetAsync(photo.uri);
-            setPhoto(photo);
+            try {
+                let photo = await cameraRef.current.takePictureAsync();
+
+                const { status } = await MediaLibrary.requestPermissionsAsync();
+                if (status !== 'granted') {
+                    Alert.alert('Permission required', 'Media library permission is required to save photos.');
+                    return;
+                }
+
+                const asset = await MediaLibrary.createAssetAsync(photo.uri);
+                const album = await MediaLibrary.getAlbumAsync('MyAppPhotos');
+
+                if (album) {
+                    await MediaLibrary.addAssetsToAlbumAsync([asset], album.id, false);
+                } else {
+                    await MediaLibrary.createAlbumAsync('MyAppPhotos', asset, false);
+                }
+            } catch (error) {
+                Alert.alert('Error', 'An error occurred while taking the photo.');
+            }
         }
     }
 
@@ -85,9 +103,8 @@ const CameraPage = ({ navigation }) => {
                         </View>
                     </View>
                 </CameraView>
-            )
-            }
-        </View >
+            )}
+        </View>
     );
 };
 
