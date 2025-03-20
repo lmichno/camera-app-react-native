@@ -3,10 +3,12 @@ import { View, Text, StyleSheet, Alert, FlatList, Image, TouchableOpacity } from
 import { useFocusEffect } from '@react-navigation/native';
 import * as MediaLibrary from 'expo-media-library';
 
-const GalleryPage = () => {
+const GalleryPage = ({ navigation }) => {
     const [hasPermissions, setHasPermissions] = useState(null);
     const [photos, setPhotos] = useState([]);
     const [columns, setColumns] = useState(3);
+    const [deleteOn, setDeleteOn] = useState(false);
+    const [selected, setSelected] = useState([]);
 
     useFocusEffect(
         React.useCallback(() => {
@@ -51,8 +53,31 @@ const GalleryPage = () => {
         return <View style={styles.container}><Text style={styles.text}>Media library permission is required</Text></View>;
     }
 
+    const handleClick = async (item) => {
+        if (deleteOn) {
+            if (selected.includes(item)) {
+                let newSelected = selected.filter(photo => photo !== item);
+                setSelected(newSelected);
+            } else {
+                let newSelected = [...selected, item];
+                setSelected(newSelected);
+            }
+        } else {
+            navigation.navigate('Photo', { photo: item });
+        }
+    };
+
     const renderItem = ({ item }) => (
-        <Image source={{ uri: item.uri }} style={[styles.photo, { width: columns === 1 ? 300 : 100, height: columns === 1 ? 300 : 100 }]} />
+        <TouchableOpacity onPress={() => handleClick(item)}>
+            <View style={[styles.photoContainer, { width: columns === 1 ? 350 : 117, height: columns === 1 ? 300 : 117 }]}>
+                <Image source={{ uri: item.uri }} style={styles.photo} />
+                {selected.includes(item) && (
+                    <View style={styles.overlay}>
+                        <Image source={require('../assets/check.png')} style={styles.checkIcon} />
+                    </View>
+                )}
+            </View>
+        </TouchableOpacity>
     );
 
     return (
@@ -62,8 +87,8 @@ const GalleryPage = () => {
                     <Image source={require('../assets/layout.png')} style={{ width: 30, height: 30 }} />
                 </TouchableOpacity>
                 <Text style={styles.text}>Zdjęć: {photos.length}</Text>
-                <TouchableOpacity style={styles.change} onPress={() => setColumns(columns === 3 ? 1 : 3)}>
-                    <Image source={require('../assets/bin.png')} style={{ width: 30, height: 30 }} />
+                <TouchableOpacity style={[styles.change, { backgroundColor: deleteOn ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.2)" }]} onPress={() => { setDeleteOn(!deleteOn), setSelected([]) }}>
+                    <Image source={require('../assets/selection.png')} style={{ width: 30, height: 30, tintColor: deleteOn ? "rgb(230,230,230)" : "rgb(0,0,0)" }} />
                 </TouchableOpacity>
             </View>
             <FlatList
@@ -73,6 +98,30 @@ const GalleryPage = () => {
                 numColumns={columns}
                 key={columns}
             />
+            {deleteOn && selected.length > 0 && (
+                <View>
+                    <TouchableOpacity
+                        style={{
+                            position: 'absolute',
+                            right: -170,
+                            bottom: 20,
+                            backgroundColor: 'rgba(0,0,0,0.5)',
+                            padding: 15,
+                            borderRadius: 50,
+                            elevation: 20
+
+                        }}
+                        onPress={async () => {
+                            await MediaLibrary.deleteAssetsAsync(selected.map(photo => photo.id));
+                            setPhotos(photos.filter(photo => !selected.includes(photo)));
+                            setSelected([]);
+                            setDeleteOn(false);
+                        }}
+                    >
+                        <Image source={require('../assets/bin.png')} style={{ width: 30, height: 30, tintColor: 'white' }} />
+                    </TouchableOpacity>
+                </View>
+            )}
         </View>
     );
 };
@@ -95,11 +144,26 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.1)',
         borderRadius: 5,
     },
-    photo: {
-        width: 100,
-        height: 100,
+    photoContainer: {
         margin: 5,
         borderRadius: 5,
+        overflow: 'hidden',
+        position: 'relative',
+    },
+    photo: {
+        width: '100%',
+        height: '100%',
+    },
+    overlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    checkIcon: {
+        width: 30,
+        height: 30,
+        tintColor: 'white',
     },
     change: {
         backgroundColor: 'rgba(0, 0, 0, 0.2)',

@@ -8,6 +8,7 @@ const Stack = createStackNavigator();
 
 import CameraPage from './screens/cameraPage';
 import GalleryPage from './screens/galleryPage';
+import PhotoPage from './screens/photoPage';
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
       <Stack.Navigator initialRouteName="Camera">
         <Stack.Screen name="Camera" component={CameraPage} options={{ headerShown: false }} />
         <Stack.Screen name="Gallery" component={GalleryPage} options={{ headerShown: true }} />
+        <Stack.Screen name="Photo" component={PhotoPage} options={{ headerShown: true }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
