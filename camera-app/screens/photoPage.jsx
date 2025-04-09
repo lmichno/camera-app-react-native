@@ -73,6 +73,9 @@ const PhotoPage = ({ route, navigation }) => {
     return (
         <View style={styles.container}>
             <Image source={{ uri: photo.uri }} resizeMode={'cover'} style={[styles.photo, { width: "100%", height: "100%" }]} />
+            <Text style={styles.resolutionText}>
+                Resolution: {photo.width} x {photo.height}
+            </Text>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 350, position: 'absolute', bottom: 20 }}>
                 <TouchableOpacity style={styles.change} onPress={() => share()}>
                     <Image source={require('../assets/share.png')} style={{ width: 30, height: 30, tintColor: 'rgb(230, 230, 230)' }} />
@@ -116,6 +119,16 @@ const styles = StyleSheet.create({
         height: 60,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    resolutionText: {
+        position: 'absolute',
+        top: 20,
+        left: 20,
+        fontSize: 16,
+        color: 'white',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        padding: 5,
+        borderRadius: 5,
     },
 });
 
