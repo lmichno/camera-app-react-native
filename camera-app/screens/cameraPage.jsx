@@ -31,7 +31,6 @@ const CameraPage = ({ navigation }) => {
             } else if (permission?.granted) {
                 setCameraReady(true);
             }
-            // Ustawienie domyślnych wartości dla RadioGroup
             setFacing('back');
             setZoom(0);
             setFlashMode(false);
@@ -169,7 +168,7 @@ const CameraPage = ({ navigation }) => {
             <BottomSheet
                 ref={bottomSheetRef}
                 index={0}
-                snapPoints={['5%', '50%', '90%']}
+                snapPoints={['4.5%', '50%', '90%']}
             >
                 <BottomSheetView style={styles.bottomSheetContent}>
                     <RadioGroup
@@ -268,7 +267,7 @@ const styles = StyleSheet.create({
     },
     mapButton: {
         position: 'absolute',
-        top: 20,
+        top: 50,
         right: 20,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         padding: 10,
